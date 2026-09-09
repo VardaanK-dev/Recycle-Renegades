@@ -85,10 +85,21 @@ export async function POST(request: Request) {
 
     const forwarded = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        name: payload.name,
+        email: payload.email,
+        subject: payload.subject,
+        message: payload.message,
+        _subject: "Recycle Renegades website feedback",
+        _template: "table",
+        _captcha: "false",
+      }).toString(),
     });
     if (!forwarded.ok) {
+      console.error("Feedback forward failed:", forwarded.status);
       return NextResponse.json(
         { error: "Failed to deliver message." },
         { status: 502 },
