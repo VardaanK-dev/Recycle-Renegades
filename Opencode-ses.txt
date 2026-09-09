@@ -1,0 +1,20 @@
+PS C:\Opencode\Recycle-Renegades> opencode
+                                   ▄
+  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Session   New session - 2026-09-05T08:21:03.378Z
+  Continue  opencode -s ses_f8f57d8edffeHUlipx5KWMgSOW
+
+PS C:\Opencode\Recycle-Renegades>
+
+PS C:\Opencode\Recycle-Renegades-webgame> opencode
+                                   ▄
+  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Session   New session - 2026-09-06T08:44:22.976Z
+  Continue  opencode -s ses_f8a1c21bfffeItonKBDGPXiISp
+
