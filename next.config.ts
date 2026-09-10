@@ -11,7 +11,7 @@ const securityHeaders = [
       "font-src 'self' data:",
       "connect-src 'self'",
       "frame-ancestors 'none'",
-      "form-action 'self'",
+      "form-action 'self' https://formsubmit.co",
       "base-uri 'self'",
       "upgrade-insecure-requests",
     ].join("; "),

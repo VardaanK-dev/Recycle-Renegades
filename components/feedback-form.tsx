@@ -14,6 +14,8 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const FEEDBACK_ENDPOINT = "https://formsubmit.co/recycle.renegades%40proton.me";
+
 export function FeedbackForm({ dict }: { dict: Dict }) {
   const [values, setValues] = useState<FormValues>({
     name: "",
@@ -23,9 +25,7 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
   });
   const [honey, setHoney] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">(
-    "idle",
-  );
+  const [submitting, setSubmitting] = useState(false);
 
   const validate = (form: FormValues): FormErrors => {
     const next: FormErrors = {};
@@ -63,28 +63,17 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
     setErrors(next);
 
     if (Object.keys(next).length > 0) {
-      setStatus("idle");
       const firstField = document.querySelector<HTMLElement>("[aria-invalid='true']");
       firstField?.focus();
       return;
     }
 
-    setStatus("submitting");
-    try {
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, _honey: honey }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      setStatus("success");
-      setValues({ name: "", email: "", subject: "", message: "" });
-    } catch {
-      setStatus("error");
+    if (honey.trim().length > 0) {
+      return;
     }
+
+    setSubmitting(true);
+    event.currentTarget.submit();
   };
 
   const inputClass = (hasError: boolean) =>
@@ -96,6 +85,8 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
 
   return (
     <form
+      action={FEEDBACK_ENDPOINT}
+      method="POST"
       onSubmit={handleSubmit}
       noValidate
       className="rounded-lg border border-border bg-card p-6 sm:p-8"
@@ -112,6 +103,9 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
           autoComplete="off"
         />
       </div>
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="hidden" name="_subject" value="Recycle Renegades website feedback" />
+      <input type="hidden" name="_template" value="table" />
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="feedback-name" className="text-sm font-medium">
@@ -208,29 +202,12 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
         </div>
       </div>
 
-      {status === "success" && (
-        <p
-          role="status"
-          className="mt-5 rounded-md border border-primary/30 bg-accent px-4 py-3 text-sm font-medium text-primary"
-        >
-          {dict.feedback.form.success}
-        </p>
-      )}
-      {status === "error" && (
-        <p
-          role="alert"
-          className="mt-5 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
-        >
-          {dict.feedback.form.errorGeneric}
-        </p>
-      )}
-
       <button
         type="submit"
-        disabled={status === "submitting"}
+        disabled={submitting}
         className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {status === "submitting" ? dict.feedback.form.sending : dict.feedback.form.submit}
+        {submitting ? dict.feedback.form.sending : dict.feedback.form.submit}
       </button>
     </form>
   );

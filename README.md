@@ -61,25 +61,26 @@ cards hide those links when empty.
 4. Optional: set the `NEXT_PUBLIC_SITE_URL` environment variable (e.g.
    `https://recycle-renegades.vercel.app`) so the generated sitemap uses the
    production domain.
-5. For the feedback form, set `FEEDBACK_FORM_ENDPOINT` to a webhook/API endpoint
-   that should receive submissions (falls back to `CONTACT_FORM_ENDPOINT`). We use
-   FormSubmit.co: `FEEDBACK_FORM_ENDPOINT=https://formsubmit.co/you@example.com`
-   (URL-encode the `@` as `%40`). If unset, the API returns `503` instead of
-   pretending the message was sent. Note: the first submission triggers a
-   FormSubmit activation email — no messages are forwarded until it is confirmed.
+5. The feedback form posts directly to FormSubmit from the browser — no server
+   route or environment variable is required. The recipient endpoint is defined
+   in `components/feedback-form.tsx`
+   (`https://formsubmit.co/recycle.renegades@proton.me`, with the `@` encoded
+   as `%40`). Note: the first submission triggers a FormSubmit activation
+   email — no messages are forwarded until you click that link (check spam/Junk
+   folders if it does not appear).
 
 GitHub Actions CI (`.github/workflows/ci.yml`) runs lint, typecheck, and build on
 every push and pull request.
 
 ## Feedback form
 
-The client posts `{ name, email, subject, message }` to `/api/feedback`, which
-validates, sanitizes, and forwards the payload to `FEEDBACK_FORM_ENDPOINT`
-(previously `CONTACT_FORM_ENDPOINT` when set). A hidden honeypot field
-(`_honey`) is included to deflect bots without a captcha.
+The form is a standard browser POST to FormSubmit directly — there is no API
+route. The recipient endpoint lives in `components/feedback-form.tsx`.
+Client-side validation runs first; a hidden honeypot field (`_honey`) deflects
+bots, and FormSubmit's own spam controls apply on their side (their reCAPTCHA is
+disabled with `_captcha=false`). The `_subject` and `_template` hidden fields
+shape the delivered email.
 
-`/api/feedback` is a Next.js route handler, so it only runs on a Node/Vercel
-runtime. If the site is deployed as static files only (e.g. the Helmet `start`
-path), this route will not execute; the form would then need to post directly to
-FormSubmit from the browser, which also requires relaxing the `connect-src` and
-`form-action` entries in `next.config.ts` to allow `https://formsubmit.co`.
+Because the browser posts cross-origin, the `form-action` CSP directive in
+`next.config.ts` allows `https://formsubmit.co`. This approach works on any
+hosting — including static-only deployments — and never exposes server config.
