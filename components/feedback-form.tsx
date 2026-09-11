@@ -14,7 +14,7 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const FEEDBACK_ENDPOINT = "https://formsubmit.co/recycle.renegades%40proton.me";
+const FEEDBACK_ENDPOINT = "https://formsubmit.co/ajax/recycle.renegades%40proton.me";
 
 export function FeedbackForm({ dict }: { dict: Dict }) {
   const [values, setValues] = useState<FormValues>({
@@ -25,7 +25,9 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
   });
   const [honey, setHoney] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
-  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">(
+    "idle",
+  );
 
   const validate = (form: FormValues): FormErrors => {
     const next: FormErrors = {};
@@ -55,6 +57,9 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
       delete next[field];
       return next;
     });
+    if (status !== "idle") {
+      setStatus("idle");
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -72,8 +77,44 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
       return;
     }
 
-    setSubmitting(true);
-    event.currentTarget.submit();
+    setStatus("submitting");
+    try {
+      const response = await fetch(FEEDBACK_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new URLSearchParams({
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          message: values.message,
+          _subject: "Recycle Renegades website feedback",
+          _template: "table",
+          _captcha: "false",
+          _url: window.location.href,
+          _honey: honey,
+        }),
+      });
+
+      let ok = response.ok;
+      try {
+        const data = (await response.json()) as { success?: unknown };
+        if ("success" in data) {
+          ok = data.success === true || data.success === "true";
+        }
+      } catch {
+        ok = response.ok;
+      }
+
+      if (!ok) {
+        throw new Error("FormSubmit did not accept the submission.");
+      }
+
+      setStatus("success");
+      setValues({ name: "", email: "", subject: "", message: "" });
+      setHoney("");
+    } catch {
+      setStatus("error");
+    }
   };
 
   const inputClass = (hasError: boolean) =>
@@ -85,8 +126,6 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
 
   return (
     <form
-      action={FEEDBACK_ENDPOINT}
-      method="POST"
       onSubmit={handleSubmit}
       noValidate
       className="rounded-lg border border-border bg-card p-6 sm:p-8"
@@ -103,9 +142,6 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
           autoComplete="off"
         />
       </div>
-      <input type="hidden" name="_captcha" value="false" />
-      <input type="hidden" name="_subject" value="Recycle Renegades website feedback" />
-      <input type="hidden" name="_template" value="table" />
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="feedback-name" className="text-sm font-medium">
@@ -202,12 +238,29 @@ export function FeedbackForm({ dict }: { dict: Dict }) {
         </div>
       </div>
 
+      {status === "success" && (
+        <p
+          role="status"
+          className="mt-5 rounded-md border border-primary/30 bg-accent px-4 py-3 text-sm font-medium text-primary"
+        >
+          {dict.feedback.form.success}
+        </p>
+      )}
+      {status === "error" && (
+        <p
+          role="alert"
+          className="mt-5 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
+        >
+          {dict.feedback.form.errorGeneric}
+        </p>
+      )}
+
       <button
         type="submit"
-        disabled={submitting}
+        disabled={status === "submitting"}
         className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {submitting ? dict.feedback.form.sending : dict.feedback.form.submit}
+        {status === "submitting" ? dict.feedback.form.sending : dict.feedback.form.submit}
       </button>
     </form>
   );

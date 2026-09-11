@@ -61,11 +61,12 @@ cards hide those links when empty.
 4. Optional: set the `NEXT_PUBLIC_SITE_URL` environment variable (e.g.
    `https://recycle-renegades.vercel.app`) so the generated sitemap uses the
    production domain.
-5. The feedback form posts directly to FormSubmit from the browser — no server
-   route or environment variable is required. The recipient endpoint is defined
-   in `components/feedback-form.tsx`
-   (`https://formsubmit.co/recycle.renegades@proton.me`, with the `@` encoded
-   as `%40`). Note: the first submission triggers a FormSubmit activation
+5. The feedback form sends submissions to FormSubmit's AJAX endpoint directly
+   from the browser — no server route or environment variable is required. The
+   endpoint lives in `components/feedback-form.tsx`
+   (`https://formsubmit.co/ajax/recycle.renegades@proton.me`, with the `@`
+   encoded as `%40`). A success/error message is shown in the page after
+   submitting. Note: the first submission triggers a FormSubmit activation
    email — no messages are forwarded until you click that link (check spam/Junk
    folders if it does not appear).
 
@@ -74,13 +75,15 @@ every push and pull request.
 
 ## Feedback form
 
-The form is a standard browser POST to FormSubmit directly — there is no API
-route. The recipient endpoint lives in `components/feedback-form.tsx`.
-Client-side validation runs first; a hidden honeypot field (`_honey`) deflects
-bots, and FormSubmit's own spam controls apply on their side (their reCAPTCHA is
-disabled with `_captcha=false`). The `_subject` and `_template` hidden fields
-shape the delivered email.
+The form submits to FormSubmit's AJAX endpoint (`https://formsubmit.co/ajax/…`)
+from the browser with `fetch` — there is no API route. The endpoint lives in
+`components/feedback-form.tsx`. Client-side validation runs first; a hidden
+honeypot field (`_honey`) deflects bots, and FormSubmit's own spam controls
+apply on their side (their reCAPTCHA is disabled with `_captcha=false`). The
+`_subject` and `_template` fields shape the delivered email, and a success/error
+banner is rendered in the page after submitting.
 
-Because the browser posts cross-origin, the `form-action` CSP directive in
-`next.config.ts` allows `https://formsubmit.co`. This approach works on any
-hosting — including static-only deployments — and never exposes server config.
+Because the browser talks to `formsubmit.co` cross-origin, the `connect-src`
+and `form-action` CSP directives in `next.config.ts` allow `https://formsubmit.co`.
+This approach works on any hosting — including static-only deployments — and
+never exposes server config.

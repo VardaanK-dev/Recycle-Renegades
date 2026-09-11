@@ -9,7 +9,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://formsubmit.co",
       "frame-ancestors 'none'",
       "form-action 'self' https://formsubmit.co",
       "base-uri 'self'",
