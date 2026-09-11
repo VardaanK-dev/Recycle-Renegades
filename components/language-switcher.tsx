@@ -80,8 +80,8 @@ export function LanguageSwitcher({
         <ul
           role="listbox"
           aria-label="Choose language"
-          className={`absolute right-0 z-50 max-h-72 w-44 overflow-auto rounded-lg border border-border bg-card p-1 shadow-lg ${
-            openAbove ? "bottom-full mb-2" : "top-full mt-2"
+          className={`absolute z-50 max-h-72 w-44 overflow-auto rounded-lg border border-border bg-card p-1 shadow-lg ${
+            openAbove ? "bottom-full left-0 mb-2" : "top-full right-0 mt-2"
           }`}
         >
           {locales.map((locale) => (
