@@ -15,8 +15,10 @@ function switchLocalePathname(pathname: string, locale: Locale): string {
 
 export function LanguageSwitcher({
   currentLocale,
+  openAbove = false,
 }: {
   currentLocale: Locale;
+  openAbove?: boolean;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -78,7 +80,9 @@ export function LanguageSwitcher({
         <ul
           role="listbox"
           aria-label="Choose language"
-          className="absolute right-0 z-50 mt-2 max-h-72 w-44 overflow-auto rounded-lg border border-border bg-card p-1 shadow-lg"
+          className={`absolute right-0 z-50 max-h-72 w-44 overflow-auto rounded-lg border border-border bg-card p-1 shadow-lg ${
+            openAbove ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
         >
           {locales.map((locale) => (
             <li key={locale} role="option" aria-selected={locale === currentLocale}>

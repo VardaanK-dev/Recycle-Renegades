@@ -142,7 +142,7 @@ export function Navbar({ dict, locale }: { dict: Dict; locale: Locale }) {
                 </Link>
               ))}
               <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-                <LanguageSwitcher currentLocale={locale} />
+                <LanguageSwitcher currentLocale={locale} openAbove />
                 <ThemeToggle />
               </div>
             </div>
